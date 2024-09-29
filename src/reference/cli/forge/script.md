@@ -103,6 +103,11 @@ Options:
           
           [env: ETH_GAS_PRICE=]
 
+      --timeout <TIMEOUT>
+          Timeout to use for broadcasting transactions
+          
+          [env: ETH_TIMEOUT=]
+
   -h, --help
           Print help (see a summary with '-h')
 
@@ -166,7 +171,11 @@ Compiler options:
           Activate the Solidity optimizer
 
       --optimizer-runs <RUNS>
-          The number of optimizer runs
+          The number of runs specifies roughly how often each opcode of the deployed code will be
+          executed across the life-time of the contract. This means it is a trade-off parameter
+          between code size (deploy cost) and code execution cost (cost after deployment). An
+          `optimizer_runs` parameter of `1` will produce short but expensive code. In contrast, a
+          larger `optimizer_runs` parameter will produce longer but more gas efficient code
 
       --extra-output <SELECTOR>...
           Extra output to include in the contract's artifact.
@@ -336,7 +345,7 @@ EVM options:
           The initial balance of deployed test contracts
 
       --sender <ADDRESS>
-          The address which will be executing tests
+          The address which will be executing tests/scripts
 
       --ffi
           Enable the FFI cheatcode
@@ -439,7 +448,7 @@ Executor environment config:
           [default: 5]
 
       --delay <DELAY>
-          Optional delay to apply inbetween verification attempts, in seconds
+          Optional delay to apply in between verification attempts, in seconds
           
           [default: 5]
 
