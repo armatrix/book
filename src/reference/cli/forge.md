@@ -35,12 +35,12 @@ Commands:
   script             Run a smart contract as a script, building transactions that can be sent
                      onchain
   selectors          Function selector utilities [aliases: se]
-  snapshot           Create a snapshot of each test's gas usage [aliases: s]
+  snapshot           Create a gas snapshot of each test's gas usage [aliases: s]
   soldeer            Soldeer dependency manager
   test               Run the project's tests [aliases: t]
   tree               Display a tree visualization of the project's dependency graph [aliases: tr]
   update             Update one or multiple dependencies [aliases: u]
-  verify-bytecode    Verify the deployed bytecode against its source [aliases: vb]
+  verify-bytecode    Verify the deployed bytecode against its source on Etherscan [aliases: vb]
   verify-check       Check verification status on Etherscan [aliases: vc]
   verify-contract    Verify smart contracts on Etherscan [aliases: v]
 

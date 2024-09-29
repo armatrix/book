@@ -4,7 +4,7 @@ Generate coverage reports
 
 ```bash
 $ forge coverage --help
-Usage: forge coverage [OPTIONS]
+Usage: forge coverage [OPTIONS] [PATH]
 
 Options:
       --report <REPORT>
@@ -33,34 +33,33 @@ Options:
           Print help (see a summary with '-h')
 
 Test options:
-      --debug <TEST_FUNCTION>
-          Run a test in the debugger.
-          
-          The argument passed to this flag is the name of the test function you want to run, and it
-          works the same as --match-test.
-          
-          If more than one test matches your specified criteria, you must add additional filters
-          until only one test is found (see --match-contract and --match-path).
+      --debug [<DEPRECATED_TEST_FUNCTION_REGEX>]
+          Run a single test in the debugger.
           
           The matching test will be opened in the debugger regardless of the outcome of the test.
           
           If the matching test is a fuzz test, then it will open the debugger on the first failure
           case. If the fuzz test does not fail, it will open the debugger on the last fuzz case.
-          
-          For more fine-grained control of which fuzz case is run, see forge run.
 
-      --decode-internal [<TEST_FUNCTION>]
-          Whether to identify internal functions in traces.
+      --flamegraph
+          Generate a flamegraph for a single test. Implies `--decode-internal`.
           
-          If no argument is passed to this flag, it will trace internal functions scope and decode
-          stack parameters, but parameters stored in memory (such as bytes or arrays) will not be
-          decoded.
+          A flame graph is used to visualize which functions or operations within the smart contract
+          are consuming the most gas overall in a sorted manner.
+
+      --flamechart
+          Generate a flamechart for a single test. Implies `--decode-internal`.
           
-          To decode memory parameters, you should pass an argument with a test function name,
-          similarly to --debug and --match-test.
+          A flame chart shows the gas usage over time, illustrating when each function is called
+          (execution order) and how much gas it consumes at each point in the timeline.
+
+      --decode-internal [<DEPRECATED_TEST_FUNCTION_REGEX>]
+          Identify internal functions in traces.
           
-          If more than one test matches your specified criteria, you must add additional filters
-          until only one test is found (see --match-contract and --match-path).
+          This will trace internal functions and decode stack parameters.
+          
+          Parameters stored in memory (such as bytes or arrays) are currently decoded only when a
+          single function is matched, similarly to `--debug`, for performance reasons.
 
       --gas-report
           Print a gas report
@@ -97,9 +96,15 @@ Test options:
       --show-progress
           Show test execution progress
 
+  [PATH]
+          The contract file you want to test, it's a shortcut for --match-path
+
 Display options:
       --json
           Output test results in JSON format
+
+      --junit
+          Output test results as JUnit XML report
 
   -l, --list
           List tests instead of running them
@@ -186,7 +191,7 @@ EVM options:
           The initial balance of deployed test contracts
 
       --sender <ADDRESS>
-          The address which will be executing tests
+          The address which will be executing tests/scripts
 
       --ffi
           Enable the FFI cheatcode
@@ -343,7 +348,11 @@ Compiler options:
           Activate the Solidity optimizer
 
       --optimizer-runs <RUNS>
-          The number of optimizer runs
+          The number of runs specifies roughly how often each opcode of the deployed code will be
+          executed across the life-time of the contract. This means it is a trade-off parameter
+          between code size (deploy cost) and code execution cost (cost after deployment). An
+          `optimizer_runs` parameter of `1` will produce short but expensive code. In contrast, a
+          larger `optimizer_runs` parameter will produce longer but more gas efficient code
 
       --extra-output <SELECTOR>...
           Extra output to include in the contract's artifact.
