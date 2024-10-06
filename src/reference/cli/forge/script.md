@@ -103,6 +103,11 @@ Options:
           
           [env: ETH_GAS_PRICE=]
 
+      --timeout <TIMEOUT>
+          Timeout to use for broadcasting transactions
+          
+          [env: ETH_TIMEOUT=]
+
   -h, --help
           Print help (see a summary with '-h')
 
@@ -113,6 +118,13 @@ Cache options:
 Build options:
       --no-cache
           Disable the cache
+
+      --eof
+          Use EOF-enabled solc binary. Enables via-ir and sets EVM version to Prague. Requires
+          Docker to be installed.
+          
+          Note that this is a temporary solution until the EOF support is merged into the main solc
+          release.
 
       --skip <SKIP>...
           Skip building files whose names contain the given filter.
@@ -166,7 +178,11 @@ Compiler options:
           Activate the Solidity optimizer
 
       --optimizer-runs <RUNS>
-          The number of optimizer runs
+          The number of runs specifies roughly how often each opcode of the deployed code will be
+          executed across the life-time of the contract. This means it is a trade-off parameter
+          between code size (deploy cost) and code execution cost (cost after deployment). An
+          `optimizer_runs` parameter of `1` will produce short but expensive code. In contrast, a
+          larger `optimizer_runs` parameter will produce longer but more gas efficient code
 
       --extra-output <SELECTOR>...
           Extra output to include in the contract's artifact.
@@ -266,7 +282,7 @@ Wallet options - raw:
 
 Wallet options - keystore:
       --keystore <PATHS>
-          Use the keystore in the given folder or file
+          Use the keystore by its filename in the given folder
           
           [env: ETH_KEYSTORE=]
           [aliases: keystores]
@@ -336,7 +352,7 @@ EVM options:
           The initial balance of deployed test contracts
 
       --sender <ADDRESS>
-          The address which will be executing tests
+          The address which will be executing tests/scripts
 
       --ffi
           Enable the FFI cheatcode
@@ -439,7 +455,7 @@ Executor environment config:
           [default: 5]
 
       --delay <DELAY>
-          Optional delay to apply inbetween verification attempts, in seconds
+          Optional delay to apply in between verification attempts, in seconds
           
           [default: 5]
 
