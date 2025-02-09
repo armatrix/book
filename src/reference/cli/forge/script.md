@@ -17,6 +17,11 @@ Arguments:
           Arguments to pass to the script function
 
 Options:
+  -j, --threads <THREADS>
+          Number of threads to use. Specifying 0 defaults to the number of logical cores
+          
+          [aliases: jobs]
+
       --target-contract <CONTRACT_NAME>
           The name of the contract you want to run
           
@@ -74,6 +79,9 @@ Options:
           
           Takes precedence over broadcast.
 
+      --dump <PATH>
+          Dumps all debugger steps to file
+
       --slow
           Makes sure a transaction is sent, only after its previous one has been confirmed and
           succeeded
@@ -92,9 +100,6 @@ Options:
       --verify
           Verifies all the contracts found in the receipts of a script, if any
 
-      --json
-          Output results in JSON format
-
       --with-gas-price <PRICE>
           Gas price for legacy transactions, or max fee per gas for EIP1559 transactions, either
           specified in wei, or as a string with a unit type.
@@ -103,8 +108,41 @@ Options:
           
           [env: ETH_GAS_PRICE=]
 
+      --timeout <TIMEOUT>
+          Timeout to use for broadcasting transactions
+          
+          [env: ETH_TIMEOUT=]
+
   -h, --help
           Print help (see a summary with '-h')
+
+Display options:
+  -v, --verbosity...
+          Verbosity level of the log messages.
+          
+          Pass multiple times to increase the verbosity (e.g. -v, -vv, -vvv).
+          
+          Depending on the context the verbosity levels have different meanings.
+          
+          For example, the verbosity levels of the EVM are:
+          - 2 (-vv): Print logs for all tests.
+          - 3 (-vvv): Print execution traces for failing tests.
+          - 4 (-vvvv): Print execution traces for all tests, and setup traces for failing tests.
+          - 5 (-vvvvv): Print execution and setup traces for all tests, including storage changes.
+
+  -q, --quiet
+          Do not print log messages
+
+      --json
+          Format log messages as JSON
+
+      --color <COLOR>
+          The color of the log messages
+
+          Possible values:
+          - auto:   Intelligently guess whether to use color output (default)
+          - always: Force color output
+          - never:  Force disable color output
 
 Cache options:
       --force
@@ -113,6 +151,13 @@ Cache options:
 Build options:
       --no-cache
           Disable the cache
+
+      --eof
+          Use EOF-enabled solc binary. Enables via-ir and sets EVM version to Prague. Requires
+          Docker to be installed.
+          
+          Note that this is a temporary solution until the EOF support is merged into the main solc
+          release.
 
       --skip <SKIP>...
           Skip building files whose names contain the given filter.
@@ -153,20 +198,23 @@ Compiler options:
           
           This is equivalent to setting `bytecode_hash` to `none` and `cbor_metadata` to `false`.
 
-      --silent
-          Don't print anything on startup
-
       --ast
           Includes the AST as JSON in the compiler output
 
       --evm-version <VERSION>
           The target EVM version
 
-      --optimize
+      --optimize [<OPTIMIZE>]
           Activate the Solidity optimizer
+          
+          [possible values: true, false]
 
       --optimizer-runs <RUNS>
-          The number of optimizer runs
+          The number of runs specifies roughly how often each opcode of the deployed code will be
+          executed across the life-time of the contract. This means it is a trade-off parameter
+          between code size (deploy cost) and code execution cost (cost after deployment). An
+          `optimizer_runs` parameter of `1` will produce short but expensive code. In contrast, a
+          larger `optimizer_runs` parameter will produce longer but more gas efficient code
 
       --extra-output <SELECTOR>...
           Extra output to include in the contract's artifact.
@@ -266,7 +314,7 @@ Wallet options - raw:
 
 Wallet options - keystore:
       --keystore <PATHS>
-          Use the keystore in the given folder or file
+          Use the keystore by its filename in the given folder
           
           [env: ETH_KEYSTORE=]
           [aliases: keystores]
@@ -336,7 +384,7 @@ EVM options:
           The initial balance of deployed test contracts
 
       --sender <ADDRESS>
-          The address which will be executing tests
+          The address which will be executing tests/scripts
 
       --ffi
           Enable the FFI cheatcode
@@ -344,16 +392,8 @@ EVM options:
       --always-use-create-2-factory
           Use the create 2 factory in all cases including tests and non-broadcasting scripts
 
-  -v, --verbosity...
-          Verbosity of the EVM.
-          
-          Pass multiple times to increase the verbosity (e.g. -v, -vv, -vvv).
-          
-          Verbosity levels:
-          - 2: Print logs for all tests
-          - 3: Print execution traces for failing tests
-          - 4: Print execution traces for all tests, and setup traces for failing tests
-          - 5: Print execution and setup traces for all tests
+      --create2-deployer <ADDRESS>
+          The CREATE2 deployer address to use, this will override the one in the config
 
 Fork config:
       --compute-units-per-second <CUPS>
@@ -373,9 +413,6 @@ Fork config:
           [aliases: no-rate-limit]
 
 Executor environment config:
-      --gas-limit <GAS_LIMIT>
-          The block gas limit
-
       --code-size-limit <CODE_SIZE>
           EIP-170: Contract code size limit in bytes. Useful to increase this because of tests. By
           default, it is 0x6000 (~25kb)
@@ -413,6 +450,8 @@ Executor environment config:
 
       --block-gas-limit <GAS_LIMIT>
           The block gas limit
+          
+          [aliases: gas-limit]
 
       --memory-limit <MEMORY_LIMIT>
           The memory limit per EVM execution in bytes. If this limit is exceeded, a `MemoryLimitOOG`
@@ -430,8 +469,8 @@ Executor environment config:
           as a separate transaction in a separate EVM context, enabling more precise gas accounting
           and transaction state changes
 
-      --alphanet
-          Whether to enable Alphanet features
+      --odyssey
+          Whether to enable Odyssey features
 
       --retries <RETRIES>
           Number of attempts for retrying verification
@@ -439,7 +478,7 @@ Executor environment config:
           [default: 5]
 
       --delay <DELAY>
-          Optional delay to apply inbetween verification attempts, in seconds
+          Optional delay to apply in between verification attempts, in seconds
           
           [default: 5]
 
@@ -448,7 +487,18 @@ Verifier options:
           The contract verification provider to use
           
           [default: etherscan]
-          [possible values: etherscan, sourcify, blockscout, oklink]
+
+          Possible values:
+          - etherscan
+          - sourcify
+          - blockscout
+          - oklink
+          - custom:     Custom verification provider, requires compatibility with the Etherscan API
+
+      --verifier-api-key <VERIFIER_API_KEY>
+          The verifier API KEY, if using a custom provider
+          
+          [env: VERIFIER_API_KEY=]
 
       --verifier-url <VERIFIER_URL>
           The verifier URL, if using a custom provider
