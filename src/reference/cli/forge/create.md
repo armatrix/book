@@ -17,6 +17,9 @@ Options:
       --constructor-args-path <PATH>
           The path to a file containing the constructor arguments
 
+      --broadcast
+          Broadcast the transaction
+
       --verify
           Verify contract after creation
 
@@ -29,12 +32,18 @@ Options:
           The standard json compiler input can be used to manually submit contract verification in
           the browser.
 
+      --timeout <TIMEOUT>
+          Timeout to use for broadcasting transactions
+          
+          [env: ETH_TIMEOUT=]
+
   -h, --help
           Print help (see a summary with '-h')
 
-Display options:
-      --json
-          Print the deployment information as JSON
+  -j, --threads <THREADS>
+          Number of threads to use. Specifying 0 defaults to the number of logical cores
+          
+          [aliases: jobs]
 
 Cache options:
       --force
@@ -43,6 +52,13 @@ Cache options:
 Build options:
       --no-cache
           Disable the cache
+
+      --eof
+          Use EOF-enabled solc binary. Enables via-ir and sets EVM version to Prague. Requires
+          Docker to be installed.
+          
+          Note that this is a temporary solution until the EOF support is merged into the main solc
+          release.
 
       --skip <SKIP>...
           Skip building files whose names contain the given filter.
@@ -83,20 +99,23 @@ Compiler options:
           
           This is equivalent to setting `bytecode_hash` to `none` and `cbor_metadata` to `false`.
 
-      --silent
-          Don't print anything on startup
-
       --ast
           Includes the AST as JSON in the compiler output
 
       --evm-version <VERSION>
           The target EVM version
 
-      --optimize
+      --optimize [<OPTIMIZE>]
           Activate the Solidity optimizer
+          
+          [possible values: true, false]
 
       --optimizer-runs <RUNS>
-          The number of optimizer runs
+          The number of runs specifies roughly how often each opcode of the deployed code will be
+          executed across the life-time of the contract. This means it is a trade-off parameter
+          between code size (deploy cost) and code execution cost (cost after deployment). An
+          `optimizer_runs` parameter of `1` will produce short but expensive code. In contrast, a
+          larger `optimizer_runs` parameter will produce longer but more gas efficient code
 
       --extra-output <SELECTOR>...
           Extra output to include in the contract's artifact.
@@ -203,6 +222,13 @@ Transaction options:
           
           Can be either a hex-encoded signed authorization or an address.
 
+      --access-list [<ACCESS_LIST>]
+          EIP-2930 access list.
+          
+          Accepts either a JSON-encoded access list or an empty value to create the access list via
+          an RPC call to `eth_createAccessList`. To retrieve only the access list portion, use the
+          `cast access-list` command.
+
 Ethereum options:
   -r, --rpc-url <URL>
           The RPC endpoint
@@ -228,6 +254,20 @@ Ethereum options:
           "0x6bb38c26db65749ab6e472080a3d20a2f35776494e72016d1e339593f21c59bc"]'
           
           [env: ETH_RPC_JWT_SECRET=]
+
+      --rpc-timeout <RPC_TIMEOUT>
+          Timeout for the RPC request in seconds.
+          
+          The specified timeout will be used to override the default timeout for RPC requests.
+          
+          Default value: 45
+          
+          [env: ETH_RPC_TIMEOUT=]
+
+      --rpc-headers <RPC_HEADERS>
+          Specify custom headers for RPC requests
+          
+          [env: ETH_RPC_HEADERS=]
 
   -e, --etherscan-api-key <KEY>
           The Etherscan (or equivalent) API key
@@ -275,7 +315,7 @@ Wallet options - raw:
           [default: 5]
 
       --delay <DELAY>
-          Optional delay to apply inbetween verification attempts, in seconds
+          Optional delay to apply in between verification attempts, in seconds
           
           [default: 5]
 
@@ -318,10 +358,49 @@ Verifier options:
           The contract verification provider to use
           
           [default: etherscan]
-          [possible values: etherscan, sourcify, blockscout, oklink]
+
+          Possible values:
+          - etherscan
+          - sourcify
+          - blockscout
+          - oklink
+          - custom:     Custom verification provider, requires compatibility with the Etherscan API
+
+      --verifier-api-key <VERIFIER_API_KEY>
+          The verifier API KEY, if using a custom provider
+          
+          [env: VERIFIER_API_KEY=]
 
       --verifier-url <VERIFIER_URL>
           The verifier URL, if using a custom provider
           
           [env: VERIFIER_URL=]
+
+Display options:
+      --color <COLOR>
+          The color of the log messages
+
+          Possible values:
+          - auto:   Intelligently guess whether to use color output (default)
+          - always: Force color output
+          - never:  Force disable color output
+
+      --json
+          Format log messages as JSON
+
+  -q, --quiet
+          Do not print log messages
+
+  -v, --verbosity...
+          Verbosity level of the log messages.
+          
+          Pass multiple times to increase the verbosity (e.g. -v, -vv, -vvv).
+          
+          Depending on the context the verbosity levels have different meanings.
+          
+          For example, the verbosity levels of the EVM are:
+          - 2 (-vv): Print logs for all tests.
+          - 3 (-vvv): Print execution traces for failing tests.
+          - 4 (-vvvv): Print execution traces for all tests, and setup traces for failing tests.
+          - 5 (-vvvvv): Print execution and setup traces for all tests, including storage changes.
 ```

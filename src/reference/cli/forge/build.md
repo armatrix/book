@@ -10,15 +10,31 @@ Options:
   -h, --help
           Print help (see a summary with '-h')
 
+  -j, --threads <THREADS>
+          Number of threads to use. Specifying 0 defaults to the number of logical cores
+          
+          [aliases: jobs]
+
 Build options:
       --names
           Print compiled contract names
 
       --sizes
-          Print compiled contract sizes
+          Print compiled contract sizes. Constructor argument length is not included in the
+          calculation of initcode size
+
+      --ignore-eip-3860
+          Ignore initcode contract bytecode size limit introduced by EIP-3860
 
       --no-cache
           Disable the cache
+
+      --eof
+          Use EOF-enabled solc binary. Enables via-ir and sets EVM version to Prague. Requires
+          Docker to be installed.
+          
+          Note that this is a temporary solution until the EOF support is merged into the main solc
+          release.
 
       --skip <SKIP>...
           Skip building files whose names contain the given filter.
@@ -66,20 +82,23 @@ Compiler options:
           
           This is equivalent to setting `bytecode_hash` to `none` and `cbor_metadata` to `false`.
 
-      --silent
-          Don't print anything on startup
-
       --ast
           Includes the AST as JSON in the compiler output
 
       --evm-version <VERSION>
           The target EVM version
 
-      --optimize
+      --optimize [<OPTIMIZE>]
           Activate the Solidity optimizer
+          
+          [possible values: true, false]
 
       --optimizer-runs <RUNS>
-          The number of optimizer runs
+          The number of runs specifies roughly how often each opcode of the deployed code will be
+          executed across the life-time of the contract. This means it is a trade-off parameter
+          between code size (deploy cost) and code execution cost (cost after deployment). An
+          `optimizer_runs` parameter of `1` will produce short but expensive code. In contrast, a
+          larger `optimizer_runs` parameter will produce longer but more gas efficient code
 
       --extra-output <SELECTOR>...
           Extra output to include in the contract's artifact.
@@ -167,7 +186,31 @@ Watch options:
           
           When using --poll mode, you'll want a larger duration, or risk overloading disk I/O.
 
-      --format-json
-          Output the compilation errors in the json format. This is useful when you want to use the
-          output in other tools
+Display options:
+      --color <COLOR>
+          The color of the log messages
+
+          Possible values:
+          - auto:   Intelligently guess whether to use color output (default)
+          - always: Force color output
+          - never:  Force disable color output
+
+      --json
+          Format log messages as JSON
+
+  -q, --quiet
+          Do not print log messages
+
+  -v, --verbosity...
+          Verbosity level of the log messages.
+          
+          Pass multiple times to increase the verbosity (e.g. -v, -vv, -vvv).
+          
+          Depending on the context the verbosity levels have different meanings.
+          
+          For example, the verbosity levels of the EVM are:
+          - 2 (-vv): Print logs for all tests.
+          - 3 (-vvv): Print execution traces for failing tests.
+          - 4 (-vvvv): Print execution traces for all tests, and setup traces for failing tests.
+          - 5 (-vvvvv): Print execution and setup traces for all tests, including storage changes.
 ```
